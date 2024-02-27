@@ -1,0 +1,18 @@
+accelerate launch --config_file=deepspeed_zero3.yaml --num_processes 4 dpo.py \
+    --model_name_or_path=daryl149/llama-2-7b-chat-hf \
+    --per_device_train_batch_size 1 \
+    --max_steps 1000 \
+    --learning_rate 1e-3 \
+    --gradient_accumulation_steps 1 \
+    --logging_steps 10 \
+    --eval_steps 500 \
+    --output_dir="dpo_anthropic_hh" \
+    --optim rmsprop \
+    --warmup_steps 150 \
+    --report_to wandb \
+    --logging_first_step \
+    --no_remove_unused_columns \
+    --use_peft \
+    --lora_r=16 \
+    --lora_alpha=16 \
+    --bf16
