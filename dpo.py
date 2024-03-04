@@ -61,13 +61,13 @@ from trl import DPOTrainer, ModelConfig, get_kbit_device_map, get_peft_config, g
 @dataclass
 class ScriptArguments:
     beta: float = field(default=0.1, metadata={"help": "the beta parameter for DPO loss"})
-    #max_length: int = field(default=512, metadata={"help": "max length of each sample"})
-    max_length: int = field(default=128, metadata={"help": "max length of each sample"})
+    max_length: int = field(default=512, metadata={"help": "max length of each sample"})
+    # max_length: int = field(default=128, metadata={"help": "max length of each sample"})
     max_prompt_length: int = field(default=128, metadata={"help": "max length of each sample's prompt"})
     max_target_length: int = field(
         default=128, metadata={"help": "Only used for encoder decoder model. Max target of each sample's prompt"}
     )
-    sanity_check: bool = field(default=True, metadata={"help": "only train on 1000 samples"})
+    sanity_check: bool = field(default=False, metadata={"help": "only train on 1000 samples"})
     ignore_bias_buffers: bool = field(
         default=False,
         metadata={
@@ -116,6 +116,35 @@ def get_hh(split: str, sanity_check: bool = False, silent: bool = False, cache_d
     return dataset.map(split_prompt_and_responses)
 
 
+def get_ultra_hh(split: str, sanity_check: bool = False, silent: bool = False, cache_dir: Optional[str] = None) -> Dataset:
+    """Load the Anthropic Helpful-Harmless dataset from Hugging Face and convert it to the necessary format.
+
+    The dataset is converted to a dictionary with the following structure:
+    {
+        'prompt': List[str],
+        'chosen': List[str],
+        'rejected': List[str],
+    }
+
+    Prompts should be structured as follows:
+      \n\nHuman: <prompt>\n\nAssistant:
+    Multiple turns are allowed, but the prompt should always start with \n\nHuman: and end with \n\nAssistant:.
+    """
+    dataset = load_dataset('json', data_files='./data/ultra_hh.json', split=split)
+    # dataset = load_dataset("Anthropic/hh-rlhf", split=split, cache_dir=cache_dir)
+    # if sanity_check:
+    #     dataset = dataset.select(range(min(len(dataset), 1000)))
+
+    def split_prompt_and_responses(sample) -> Dict[str, str]:
+        # prompt = extract_anthropic_prompt(sample["chosen"])
+        return {
+            "prompt": sample["demon_prompt"],
+            "chosen": sample["chosen"],
+            "rejected": sample["rejected"],
+        }
+
+    return dataset.map(split_prompt_and_responses)
+
 if __name__ == "__main__":
     parser = HfArgumentParser((ScriptArguments, TrainingArguments, ModelConfig))
     args, training_args, model_config = parser.parse_args_into_dataclasses()
@@ -138,7 +167,8 @@ if __name__ == "__main__":
         device_map=get_kbit_device_map() if quantization_config is not None else None,
         quantization_config=quantization_config,
     )
-    model = AutoModelForCausalLM.from_pretrained(model_config.model_name_or_path, **model_kwargs)
+    # model = AutoModelForCausalLM.from_pretrained(model_config.model_name_or_path, **model_kwargs)
+    model = AutoModelForCausalLM.from_pretrained("./model_llama/ultra_hh/checkpoint-22000", **model_kwargs)
     peft_config = get_peft_config(model_config)
     if peft_config is None:
         model_ref = AutoModelForCausalLM.from_pretrained(model_config.model_name_or_path, **model_kwargs)
@@ -156,8 +186,8 @@ if __name__ == "__main__":
     ################
     # Dataset
     ################
-    train_dataset = get_hh("train", sanity_check=args.sanity_check)
-    eval_dataset = get_hh("test", sanity_check=args.sanity_check)
+    train_dataset = get_ultra_hh("train[:-500]", sanity_check=args.sanity_check)
+    eval_dataset = get_ultra_hh("train[-500:]", sanity_check=args.sanity_check)
 
     ################
     # Training
