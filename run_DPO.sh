@@ -30,12 +30,12 @@ cd ~/dpo_trl || exit
 accelerate launch --config_file=deepspeed_zero3.yaml dpo.py \
     --model_name_or_path=daryl149/llama-2-7b-chat-hf \
     --per_device_train_batch_size 1 \
-    --max_steps 30000 \
+    --max_steps 10000 \
     --learning_rate 1e-3 \
     --gradient_accumulation_steps 1 \
     --logging_steps 10 \
     --eval_steps 500 \
-    --output_dir="./model_llama/ultra_hh_dpo" \
+    --output_dir="./model_llama/hh_test" \
     --optim rmsprop \
     --warmup_steps 150 \
     --report_to wandb \

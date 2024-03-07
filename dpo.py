@@ -168,7 +168,7 @@ if __name__ == "__main__":
         quantization_config=quantization_config,
     )
     # model = AutoModelForCausalLM.from_pretrained(model_config.model_name_or_path, **model_kwargs)
-    model = AutoModelForCausalLM.from_pretrained("./model_llama/ultra_hh/checkpoint-22000", **model_kwargs)
+    model = AutoModelForCausalLM.from_pretrained(model_config.model_name_or_path, **model_kwargs)
     peft_config = get_peft_config(model_config)
     if peft_config is None:
         model_ref = AutoModelForCausalLM.from_pretrained(model_config.model_name_or_path, **model_kwargs)
@@ -186,8 +186,10 @@ if __name__ == "__main__":
     ################
     # Dataset
     ################
-    train_dataset = get_ultra_hh("train[:-500]", sanity_check=args.sanity_check)
-    eval_dataset = get_ultra_hh("train[-500:]", sanity_check=args.sanity_check)
+    train_dataset = get_hh("train", sanity_check=args.sanity_check)
+    eval_dataset = get_hh("test", sanity_check=args.sanity_check)
+    # train_dataset = get_ultra_hh("train[:-500]", sanity_check=args.sanity_check)
+    # eval_dataset = get_ultra_hh("train[-500:]", sanity_check=args.sanity_check)
 
     ################
     # Training

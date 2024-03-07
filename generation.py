@@ -4,7 +4,9 @@ import datasets
 import json
 
 
-name="DPO"
+name="DPO_hh"
+if name=="DPO_hh":
+    checkpoint="./model_llama/hh_dpo/checkpoint-1000"
 if name=="Base":
     checkpoint="daryl149/llama-2-7b-chat-hf"
 if name=="DPO":
@@ -28,7 +30,7 @@ if __name__ == "__main__":
         # tokens = tokenizer(temp_instruction, return_tensors="pt").to("cuda:0")
         tokens = tokenizer(example["instruction"], return_tensors="pt").to("cuda:0")
         # output_start_ix = len(example["instruction"])
-        example["output"]=model.generate(**tokens,max_length=512)
+        example["output"]=model.generate(**tokens,max_new_tokens=512)
         decoded_output=tokenizer.decode(example["output"][0],skip_special_tokens=False)
         example["output"]=decoded_output
         result.append(example)
