@@ -148,7 +148,8 @@ def get_ultra_hh(split: str, sanity_check: bool = False, silent: bool = False, c
 if __name__ == "__main__":
     parser = HfArgumentParser((ScriptArguments, TrainingArguments, ModelConfig))
     args, training_args, model_config = parser.parse_args_into_dataclasses()
-
+    print(model_config)
+    print(training_args)
     ################
     # Model & Tokenizer
     ################

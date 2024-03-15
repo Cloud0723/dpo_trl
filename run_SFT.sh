@@ -26,13 +26,14 @@ echo "Job is starting on $(hostname)"
 cd ~/dpo_trl || exit
 
 # python test.py
-accelerate launch --config_file=deepspeed_zero3.yaml sft.py \
-    --model_name_or_path=daryl149/llama-2-7b-chat-hf \
+accelerate launch --main_process_port 29506 \
+    --config_file=deepspeed_zero3.yaml sft.py \
+    --model_name_or_path=mistralai/Mistral-7B-v0.1 \
     --report_to="wandb" \
     --learning_rate=1.41e-5 \
-    --per_device_train_batch_size=1 \
+    --per_device_train_batch_size=16 \ #16 is ok for 7B model
     --gradient_accumulation_steps=1 \
-    --output_dir="model_llama/ultra_hh" \
+    --output_dir="model_Mistral/ultra_hh_sft_2" \
     --logging_steps=1 \
     --num_train_epochs=2 \
     --max_steps=-1 \

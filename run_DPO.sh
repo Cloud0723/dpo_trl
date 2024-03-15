@@ -27,15 +27,16 @@ echo "Job is starting on $(hostname)"
 cd ~/dpo_trl || exit
 
 # python test.py
-accelerate launch --config_file=deepspeed_zero3.yaml dpo.py \
-    --model_name_or_path=daryl149/llama-2-7b-chat-hf \
+accelerate launch --main_process_port 29505 \
+    --config_file=deepspeed_zero3.yaml dpo.py \
+    --model_name_or_path=huggyllama/llama-7b \
     --per_device_train_batch_size 1 \
-    --max_steps 10000 \
-    --learning_rate 1e-3 \
+    --max_steps 1000 \
+    --learning_rate 5e-7 \
     --gradient_accumulation_steps 1 \
     --logging_steps 10 \
     --eval_steps 500 \
-    --output_dir="./model_llama/hh_test" \
+    --output_dir="./model_llama/huggyllama_test_5e-7" \
     --optim rmsprop \
     --warmup_steps 150 \
     --report_to wandb \

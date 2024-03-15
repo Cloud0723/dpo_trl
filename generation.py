@@ -4,11 +4,11 @@ import datasets
 import json
 
 
-name="DPO_hh"
-if name=="DPO_hh":
-    checkpoint="./model_llama/hh_dpo/checkpoint-1000"
-if name=="Base":
-    checkpoint="daryl149/llama-2-7b-chat-hf"
+name="model_Mistral"
+if name=="huggyllama_test":
+    checkpoint="./model_llama/huggyllama_test_5e-7/checkpoint-1000"
+if name=="model_Mistral":
+    checkpoint="./model_Mistral/ultra_hh_sft_2/checkpoint-1000"
 if name=="DPO":
     checkpoint="./model_llama/ultra_hh_dpo/checkpoint-1000"
 if name=="SFT":
