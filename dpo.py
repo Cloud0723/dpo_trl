@@ -67,7 +67,8 @@ class ScriptArguments:
     max_target_length: int = field(
         default=128, metadata={"help": "Only used for encoder decoder model. Max target of each sample's prompt"}
     )
-    sanity_check: bool = field(default=False, metadata={"help": "only train on 1000 samples"})
+    dataset: str = field(default="hh", metadata={"help": "the dataset you want"}, choices=['hh', 'ultra_hh', 'spin'])
+    sanity_check: bool = field(default=False, metadata={"help": "only train on 1000 samples for sanity check"})
     ignore_bias_buffers: bool = field(
         default=False,
         metadata={
@@ -85,6 +86,31 @@ def extract_anthropic_prompt(prompt_and_response):
     search_term_idx = prompt_and_response.rfind(search_term)
     assert search_term_idx != -1, f"Prompt and response does not contain '{search_term}'"
     return prompt_and_response[: search_term_idx + len(search_term)]
+
+
+def get_spin(split: str, sanity_check: bool = False, silent: bool = False, cache_dir: Optional[str] = None) -> Dataset:
+    """Load the SPIN dataset from Hugging Face and convert it to the necessary format.
+
+    The dataset is converted to a dictionary with the following structure:
+    {
+        'prompt': List[str],
+        'chosen': List[str],
+        'rejected': List[str],
+    }
+    """
+    dataset = load_dataset("UCLA-AGI/SPIN_iter0", split=split, cache_dir=cache_dir)
+    if sanity_check:
+        dataset = dataset.select(range(min(len(dataset), 1000)))
+
+    def split_prompt_and_responses(sample) -> Dict[str, str]:
+        prompt = extract_anthropic_prompt(sample["real"][0]["content"])
+        return {
+            "prompt": prompt,
+            "chosen": sample["real"][0]["content"][len(prompt) :],
+            "rejected": sample["generated"][0]["content"][len(prompt) :],
+        }
+
+    return dataset.map(split_prompt_and_responses)
 
 
 def get_hh(split: str, sanity_check: bool = False, silent: bool = False, cache_dir: Optional[str] = None) -> Dataset:
@@ -187,10 +213,15 @@ if __name__ == "__main__":
     ################
     # Dataset
     ################
-    train_dataset = get_hh("train", sanity_check=args.sanity_check)
-    eval_dataset = get_hh("test", sanity_check=args.sanity_check)
-    # train_dataset = get_ultra_hh("train[:-500]", sanity_check=args.sanity_check)
-    # eval_dataset = get_ultra_hh("train[-500:]", sanity_check=args.sanity_check)
+    if args.dataset == "hh":
+        train_dataset = get_hh("train", sanity_check=args.sanity_check)
+        eval_dataset = get_hh("test", sanity_check=args.sanity_check)
+    elif args.dataset == "ultra_hh":
+        train_dataset = get_ultra_hh("train[:-500]", sanity_check=args.sanity_check)
+        eval_dataset = get_ultra_hh("train[-500:]", sanity_check=args.sanity_check)
+    elif args.dataset == "spin":
+        train_dataset = get_spin("train", sanity_check=args.sanity_check)
+        eval_dataset = get_spin("test", sanity_check=args.sanity_check)
 
     ################
     # Training
