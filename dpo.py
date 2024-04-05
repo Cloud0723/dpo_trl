@@ -111,8 +111,8 @@ def get_spin(split: str, sanity_check: bool = False, silent: bool = False, cache
         prompt = sample["real"][0]["content"]
         return {
             "prompt": prompt,
-            "chosen": sample["real"][0]["content"][len(prompt) :],
-            "rejected": sample["generated"][0]["content"][len(prompt) :],
+            "chosen": sample["real"][1]["content"], # [len(prompt) :]
+            "rejected": sample["generated"][1]["content"],
         }
 
     return dataset.map(split_prompt_and_responses)
