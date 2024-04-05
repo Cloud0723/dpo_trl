@@ -67,7 +67,7 @@ class ScriptArguments:
     max_target_length: int = field(
         default=128, metadata={"help": "Only used for encoder decoder model. Max target of each sample's prompt"}
     )
-    dataset: str = field(default="hh", metadata={"help": "the dataset you want"}, choices=['hh', 'ultra_hh', 'spin'])
+    dataset: str = field(default="hh", metadata={"help": "the dataset you want, currently support: 'hh', 'ultra_hh', 'spin'"})
     sanity_check: bool = field(default=False, metadata={"help": "only train on 1000 samples for sanity check"})
     ignore_bias_buffers: bool = field(
         default=False,
@@ -97,13 +97,18 @@ def get_spin(split: str, sanity_check: bool = False, silent: bool = False, cache
         'chosen': List[str],
         'rejected': List[str],
     }
+
+    Prompts should be structured as follows:
+      \n\nHuman: <prompt>\n\nAssistant:
+    Multiple turns are allowed, but the prompt should always start with \n\nHuman: and end with \n\nAssistant:.
     """
     dataset = load_dataset("UCLA-AGI/SPIN_iter0", split=split, cache_dir=cache_dir)
     if sanity_check:
         dataset = dataset.select(range(min(len(dataset), 1000)))
 
     def split_prompt_and_responses(sample) -> Dict[str, str]:
-        prompt = extract_anthropic_prompt(sample["real"][0]["content"])
+        # prompt = "\n\nHuman: " + sample["real"][0]["content"] + "\n\nAssistant: "
+        prompt = sample["real"][0]["content"]
         return {
             "prompt": prompt,
             "chosen": sample["real"][0]["content"][len(prompt) :],
@@ -222,6 +227,9 @@ if __name__ == "__main__":
     elif args.dataset == "spin":
         train_dataset = get_spin("train", sanity_check=args.sanity_check)
         eval_dataset = get_spin("test", sanity_check=args.sanity_check)
+        # print(train_dataset)
+    else:
+        raise ValueError(f"{args.dataset} dataset is not yet supported")
 
     ################
     # Training

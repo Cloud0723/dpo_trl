@@ -32,15 +32,15 @@ cd ~/jobsubmit/dpo_trl || exit
 accelerate launch --main_process_port 29505 \
     --config_file=deepspeed_zero3.yaml dpo.py \
     --model_name_or_path=alignment-handbook/zephyr-7b-sft-full \
-    --per_device_train_batch_size 1 \
+    --per_device_train_batch_size 2 \
     --max_steps 1000 \
-    --learning_rate 5e-7 \
+    --learning_rate 5e-5 \
     --gradient_accumulation_steps 1 \
     --logging_steps 10 \
     --eval_steps 500 \
-    --output_dir="./model_llama/huggyllama_test_5e-7" \
-    --dataset "spin"\
-    --optim adamw \
+    --output_dir="./alignment-handbook/zephyr-7b-sft-full" \
+    --dataset "spin" \
+    --optim adamw_hf \
     --warmup_steps 150 \
     --report_to wandb \
     --logging_first_step \
