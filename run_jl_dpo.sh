@@ -35,10 +35,6 @@ cd ~/jobsubmit/dpo_trl || exit
 # meta-llama/Llama-2-7b
 # facebook/opt-1.3b
 
-# --use_peft \
-# --lora_r=16 \
-# --lora_alpha=16
-
 accelerate launch --main_process_port 29502 \
     --config_file=deepspeed_zero3.yaml dpo.py \
     --model_name_or_path=facebook/opt-1.3b \
@@ -55,6 +51,9 @@ accelerate launch --main_process_port 29502 \
     --report_to wandb \
     --logging_first_step \
     --no_remove_unused_columns \
-    --bf16
+    --bf16 \
+    --use_peft \
+    --lora_r=16 \
+    --lora_alpha=16
 
 exit
