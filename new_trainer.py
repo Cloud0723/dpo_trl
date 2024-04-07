@@ -26,7 +26,7 @@ from trl.models import PreTrainedModelWrapper, create_reference_model
 from trl.trainer.utils import disable_dropout_in_model, pad_to_length
 from trl import DPOTrainer
 
-from .utils import DataCollatorWithPadding
+# from .utils import DataCollatorWithPadding
 
 
 if is_peft_available():
@@ -191,7 +191,7 @@ class NewDPOTrainer(DPOTrainer):
         ## TODO: add a generation process
         print(batch)
         exit()
-        
+
         concatenated_batch = self.concatenated_inputs(
             batch,
             is_encoder_decoder=self.is_encoder_decoder,

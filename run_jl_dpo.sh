@@ -35,16 +35,16 @@ cd ~/jobsubmit/dpo_trl || exit
 # meta-llama/Llama-2-7b
 # facebook/opt-1.3b
 
-accelerate launch --main_process_port 29502 \
+accelerate launch --main_process_port 29503 \
     --config_file=deepspeed_zero3.yaml dpo.py \
-    --model_name_or_path=facebook/opt-1.3b \
-    --per_device_train_batch_size 2 \
+    --model_name_or_path=meta-llama/Llama-2-7b \
+    --per_device_train_batch_size 1 \
     --max_steps 20000 \
     --learning_rate 5e-7 \
     --gradient_accumulation_steps 1 \
     --logging_steps 10 \
     --eval_steps 500 \
-    --output_dir="./results/facebook/opt-1.3b" \
+    --output_dir="./results/meta-llama/Llama-2-7b" \
     --dataset "spin" \
     --optim rmsprop \
     --warmup_steps 150 \
