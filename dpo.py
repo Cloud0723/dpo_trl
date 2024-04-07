@@ -56,7 +56,7 @@ from datasets import Dataset, load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, TrainingArguments
 
 from trl import DPOTrainer, ModelConfig, get_kbit_device_map, get_peft_config, get_quantization_config
-
+from new_trainer import NewDPOTrainer
 
 @dataclass
 class ScriptArguments:
@@ -68,6 +68,7 @@ class ScriptArguments:
         default=128, metadata={"help": "Only used for encoder decoder model. Max target of each sample's prompt"}
     )
     dataset: str = field(default="hh", metadata={"help": "the dataset you want, currently support: 'hh', 'ultra_hh', 'spin'"})
+    trainer: str = field(default="dpo", metadata={"help": "the trainer you want, currently support: 'dpo', 'new_dpo'"})
     sanity_check: bool = field(default=False, metadata={"help": "only train on 1000 samples for sanity check"})
     ignore_bias_buffers: bool = field(
         default=False,
@@ -234,7 +235,14 @@ if __name__ == "__main__":
     ################
     # Training
     ################
-    trainer = DPOTrainer(
+    if args.trainer == "dpo":
+        Trainer = DPOTrainer
+    elif args.trainer == "new_dpo":
+        Trainer = NewDPOTrainer
+    else:
+        raise ValueError(f"{args.trainer} dataset is not yet supported")
+
+    trainer = Trainer(
         model,
         model_ref,
         args=training_args,

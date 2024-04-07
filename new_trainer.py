@@ -189,7 +189,9 @@ class NewDPOTrainer(DPOTrainer):
         We do this to avoid doing two forward passes, because it's faster for FSDP.
         """
         ## TODO: add a generation process
-
+        print(batch)
+        exit()
+        
         concatenated_batch = self.concatenated_inputs(
             batch,
             is_encoder_decoder=self.is_encoder_decoder,
