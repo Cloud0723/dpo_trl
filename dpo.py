@@ -227,7 +227,7 @@ if __name__ == "__main__":
     elif args.dataset == "spin":
         train_dataset = get_spin("train", sanity_check=args.sanity_check)
         eval_dataset = get_spin("test", sanity_check=args.sanity_check)
-        # print(train_dataset)
+        # print(train_dataset[0])
     else:
         raise ValueError(f"{args.dataset} dataset is not yet supported")
 

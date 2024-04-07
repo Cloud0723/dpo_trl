@@ -18,7 +18,7 @@ echo "TIMING - Starting jupyter at: $(date)"
 source activate spin
 wandb login 3dbaa1026adab988dca53f5bebe8eff91ed0d378
 export 'WANDB_ENTITY=jasonljx96'
-export 'WANDB_PROJECT=self_play'
+export 'WANDB_PROJECT=self_play_dpo'
 
 nvidia-smi
 unset CUDA_VISIBLE_DEVICES
@@ -28,26 +28,33 @@ echo "Job is starting on $(hostname)"
 
 cd ~/jobsubmit/dpo_trl || exit
 
-# python test.py
-accelerate launch --main_process_port 29505 \
+# Possible model names:
+# mistralai/Mistral-7B-v0.1
+# alignment-handbook/zephyr-7b-sft-full
+# huggyllama/llama-7b
+# meta-llama/Llama-2-7b
+# facebook/opt-1.3b
+
+# --use_peft \
+# --lora_r=16 \
+# --lora_alpha=16
+
+accelerate launch --main_process_port 29502 \
     --config_file=deepspeed_zero3.yaml dpo.py \
-    --model_name_or_path=alignment-handbook/zephyr-7b-sft-full \
+    --model_name_or_path=facebook/opt-1.3b \
     --per_device_train_batch_size 2 \
-    --max_steps 1000 \
-    --learning_rate 5e-5 \
+    --max_steps 20000 \
+    --learning_rate 5e-7 \
     --gradient_accumulation_steps 1 \
     --logging_steps 10 \
     --eval_steps 500 \
-    --output_dir="./alignment-handbook/zephyr-7b-sft-full" \
+    --output_dir="./results/facebook/opt-1.3b" \
     --dataset "spin" \
-    --optim adamw_hf \
+    --optim rmsprop \
     --warmup_steps 150 \
     --report_to wandb \
     --logging_first_step \
     --no_remove_unused_columns \
-    --use_peft \
-    --lora_r=16 \
-    --lora_alpha=16 \
     --bf16
 
 exit
