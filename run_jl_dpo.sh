@@ -26,7 +26,7 @@ which python3
 which wandb
 echo "Job is starting on $(hostname)"
 
-cd ~/dpo_trl_github/dpo_trl || exit
+cd ~/jobsubmit/dpo_trl || exit
 
 # Possible model names:
 # mistralai/Mistral-7B-v0.1
@@ -35,16 +35,19 @@ cd ~/dpo_trl_github/dpo_trl || exit
 # meta-llama/Llama-2-7b
 # facebook/opt-1.3b
 
+# --per_device_train_batch_size 1 \
+
 accelerate launch --main_process_port 29503 \
     --config_file=deepspeed_zero3.yaml dpo.py \
     --model_name_or_path=mistralai/Mistral-7B-v0.1 \
-    --per_device_train_batch_size 1 \
+    --train_batch_size 2 \
+    --eval_batch_size 4 \
     --max_steps 20000 \
     --learning_rate 5e-7 \
     --gradient_accumulation_steps 1 \
     --logging_steps 10 \
     --eval_steps 500 \
-    --output_dir="./results/meta-llama/Llama-2-7b" \
+    --output_dir="./results/mistralai/Mistral-7B-v0.1" \
     --dataset "spin" \
     --optim rmsprop \
     --warmup_steps 150 \

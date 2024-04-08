@@ -188,9 +188,25 @@ class NewDPOTrainer(DPOTrainer):
 
         We do this to avoid doing two forward passes, because it's faster for FSDP.
         """
-        ## TODO: add a generation process
-        print(batch)
-        exit()
+        ## ADDED a generation process
+        # print(f"batch before regenerate {batch}")
+        self.model.eval()
+        with torch.inference_mode():
+            length = batch["rejected_input_ids"].shape[1]
+            outputs_tokenized=self.model.generate(input_ids=batch['prompt_input_ids'], attention_mask=batch['prompt_attention_mask'], \
+                                                max_new_tokens=length, pad_token_id=self.tokenizer.pad_token_id)
+            # print(f"outputs_tokenized is {outputs_tokenized}")
+            
+            # outputs_tokenized = torch.stack(outputs_tokenized, dim=0)
+            outputs_mask = torch.ones_like(outputs_tokenized)
+            outputs_tokenized = pad_to_length(outputs_tokenized, length, pad_value=self.tokenizer.pad_token_id)
+            outputs_mask = pad_to_length(outputs_mask, length, pad_value=0)
+            batch['rejected_input_ids'] = outputs_tokenized
+            batch['rejected_attention_mask'] = outputs_mask
+            batch['rejected_labels']=torch.stack([ torch.cat([-100 * torch.ones(len(tok_in), dtype=tok_in.dtype, device=tok_in.device),
+                tok_out[len(tok_in) + 1:]]) for tok_in, tok_out in zip(batch["prompt_input_ids"], outputs_tokenized) ])
+        # print(f"batch after regenerate {batch}")
+        self.model.train()
 
         concatenated_batch = self.concatenated_inputs(
             batch,

@@ -15,7 +15,7 @@ module list
 # Benchmark info
 echo "TIMING - Starting jupyter at: $(date)"
 
-source activate spin
+source activate dpo
 wandb login 3dbaa1026adab988dca53f5bebe8eff91ed0d378
 export 'WANDB_ENTITY=jasonljx96'
 export 'WANDB_PROJECT=self_play_dpo'
@@ -40,9 +40,9 @@ cd ~/jobsubmit/dpo_trl || exit
 # --lora_alpha=16
 
 accelerate launch --main_process_port 29502 \
-    --config_file=deepspeed_zero3.yaml dpo.py \
+    --config_file=configs.yaml dpo.py \
     --model_name_or_path=facebook/opt-1.3b \
-    --per_device_train_batch_size 2 \
+    --per_device_train_batch_size 1 \
     --max_steps 20000 \
     --learning_rate 5e-7 \
     --gradient_accumulation_steps 1 \

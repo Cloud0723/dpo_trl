@@ -4,3 +4,4 @@ wandb
 model_llama
 alignment-handbook
 results
+__pycache__
